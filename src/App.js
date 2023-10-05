@@ -1,25 +1,59 @@
-import logo from './logo.svg';
-import './App.css';
+
+import  './components/assets/styles/styles.css';
+import  './components/assets/styles/responsive.css';
+import { useEffect } from 'react';
+import Header from "./components/Header";
+import Signup from './components/Signup';
+import Main from './components/Main';
+import { useState } from 'react';
+import BlogForm from './components/BlogForm';
+import DefaultBlog from './components/DefaultBlog';
+import { defaultData } from './components/Helpers/helpers';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+  const [isLoggedIn,setIsLoggedIn]=useState(false);
+  const [showForm, setShowForm]=useState(false);
+  const [showSignup,setShowSignup]=useState(false);
+  const [loggedInUser,setLoggedInUser]=useState({});
+  useEffect(()=>{
+    let loggedinUser=localStorage.getItem('loginDetail')?localStorage.getItem('loginDetail'):{};
+    if(loggedinUser.length){
+      setLoggedInUser(JSON.parse(loggedinUser));
+      setIsLoggedIn(true);
+    }
+  },[])
+const handleLogout = ()=>{
+    localStorage.removeItem('loginDetail');
+    setIsLoggedIn(false);
+  }
+  const updateLoggedInUserDetail = (user)=>{
+      setLoggedInUser(user);
+      localStorage.setItem('loginDetail',JSON.stringify(user));
+  }
+return(
+    <>
+        <Header isLoggedIn={isLoggedIn} handleLogout={handleLogout} setShowForm={setShowForm} setShowSignup={setShowSignup} user={loggedInUser}/>
+        <div className="page-wrapper">
+          { !isLoggedIn&&!showSignup&&
+          <DefaultBlog blog={defaultData} />
+          }
+          {
+            !isLoggedIn&&showSignup&&<Signup setIsLoggedIn={setIsLoggedIn} setShowForm={setShowForm} setShowSignup={setShowSignup} setLoggedInUser={setLoggedInUser}/>
+
+          }
+           {
+            isLoggedIn&&showForm&&
+             <BlogForm setShowForm={setShowForm} user={loggedInUser} updateLoggedInUserDetail={updateLoggedInUserDetail}/>
+             
+           }
+           {
+            isLoggedIn&&!showForm&&
+            <Main />
+           }
+           
+        </div>
+    </>
+);
 }
 
 export default App;
